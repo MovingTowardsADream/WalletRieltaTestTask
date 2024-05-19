@@ -1,0 +1,20 @@
+app:
+  name: "wallet-rielta"
+  version: "1.0.0"
+  countWorkers: 24
+  timeout: 5s
+  defaultBalance: 100
+
+http:
+  port: ":8080"
+  timeout: 10s
+
+postgres:
+  poolMax: 2
+
+rabbitmq:
+  rpcServerExchange: "rpc_server"
+  rpcClientExchange: "rpc_client"
+
+logger:
+  logLevel: "debug"
