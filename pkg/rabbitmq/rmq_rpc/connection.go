@@ -21,7 +21,7 @@ type Connection struct {
 	Delivery   <-chan amqp.Delivery // Канал для получения доставленных сообщений
 }
 
-func New(consumerExchange string, cfg Config) *Connection {
+func NewConnectionRabbitMQ(consumerExchange string, cfg Config) *Connection {
 	conn := &Connection{
 		ConsumerExchange: consumerExchange,
 		Config:           cfg,

@@ -3,6 +3,8 @@ package app
 import (
 	"WalletRieltaTestTask/config"
 	"WalletRieltaTestTask/pkg/postgres"
+	"WalletRieltaTestTask/pkg/rabbitmq/rmq_rpc/client"
+	"fmt"
 	_ "github.com/lib/pq"
 	"log/slog"
 )
@@ -17,6 +19,13 @@ func New(log *slog.Logger, cfg *config.Config) *App {
 	if err != nil {
 		panic("app - Run - postgres.NewPostgresDB: " + err.Error())
 	}
+
+	rmqClient, err := client.NewRabbitMQClient(cfg.RMQ.URL, cfg.RMQ.ServerExchange, cfg.RMQ.ClientExchange)
+	if err != nil {
+		panic("app - Run - rmqServer - server.New" + err.Error())
+	}
+
+	fmt.Println(rmqClient)
 
 	return &App{
 		DB: pg,
