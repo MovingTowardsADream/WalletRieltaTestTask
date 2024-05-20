@@ -3,9 +3,10 @@ package app
 import (
 	"WalletRieltaTestTask/config"
 	gateway "WalletRieltaTestTask/internal/wallet/gateway/rabbitmq"
-	"WalletRieltaTestTask/internal/wallet/usecase"
+	walletUseCase "WalletRieltaTestTask/internal/wallet/usecase"
 	"WalletRieltaTestTask/pkg/postgres"
 	"WalletRieltaTestTask/pkg/rabbitmq/rmq_rpc/client"
+	"fmt"
 	_ "github.com/lib/pq"
 	"log/slog"
 )
@@ -27,11 +28,13 @@ func New(log *slog.Logger, cfg *config.Config) *App {
 	}
 
 	// Use cases
-	walletUseCase := usecase.NewWallet(
+	walletUseCase := walletUseCase.NewWallet(
 		gateway.New(rmqClient),
-		usecase.Timeout(cfg.App.Timeout),
-		usecase.DefaultBalance(cfg.App.DefaultBalance),
+		walletUseCase.Timeout(cfg.App.Timeout),
+		walletUseCase.DefaultBalance(cfg.App.DefaultBalance),
 	)
+
+	fmt.Println(walletUseCase)
 
 	return &App{
 		DB: pg,
