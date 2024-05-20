@@ -4,6 +4,8 @@ import (
 	"WalletRieltaTestTask/config"
 	gateway "WalletRieltaTestTask/internal/wallet/gateway/rabbitmq"
 	walletUseCase "WalletRieltaTestTask/internal/wallet/usecase"
+	worker_postgres "WalletRieltaTestTask/internal/walletWorker/repository/postgres"
+	workerUC "WalletRieltaTestTask/internal/walletWorker/usecase"
 	"WalletRieltaTestTask/pkg/postgres"
 	"WalletRieltaTestTask/pkg/rabbitmq/rmq_rpc/client"
 	"fmt"
@@ -34,7 +36,11 @@ func New(log *slog.Logger, cfg *config.Config) *App {
 		walletUseCase.DefaultBalance(cfg.App.DefaultBalance),
 	)
 
-	fmt.Println(walletUseCase)
+	workerUseCase := workerUC.NewWalletWorker(
+		worker_postgres.New(pg),
+	)
+
+	fmt.Println(walletUseCase, workerUseCase)
 
 	return &App{
 		DB: pg,
