@@ -7,7 +7,7 @@ import (
 )
 
 type WalletRepo struct {
-	*postgres.Postgres
+	db *postgres.Postgres
 }
 
 func New(pg *postgres.Postgres) *WalletRepo {
