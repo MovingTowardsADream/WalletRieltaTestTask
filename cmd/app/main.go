@@ -4,7 +4,9 @@ import (
 	"WalletRieltaTestTask/config"
 	"WalletRieltaTestTask/internal/app"
 	"WalletRieltaTestTask/pkg/logger"
-	"fmt"
+	"os"
+	"os/signal"
+	"syscall"
 )
 
 func main() {
@@ -16,6 +18,36 @@ func main() {
 
 	application := app.New(log, cfg)
 
-	fmt.Println(application)
+	// Run servers
+	go func() {
+		application.HTTPServer.MustRun()
+	}()
+
+	go func() {
+		application.RMQServer.MustRun()
+	}()
+
+	// Graceful shutdown
+	stop := make(chan os.Signal, 1)
+	signal.Notify(stop, syscall.SIGTERM, syscall.SIGINT)
+
+	select {
+	case <-stop:
+	case <-application.RMQServer.Notify():
+	}
+
+	log.Info("Starting graceful shutdown")
+
+	if err := application.HTTPServer.Shutdown(); err != nil {
+		log.Error("HTTPServer.Shutdown error", logger.Err(err))
+	}
+
+	if err := application.RMQServer.Shutdown(); err != nil {
+		log.Error("RMQServer.Shutdown error", logger.Err(err))
+	}
+
+	application.DB.Close()
+
+	log.Info("Gracefully stopped")
 
 }

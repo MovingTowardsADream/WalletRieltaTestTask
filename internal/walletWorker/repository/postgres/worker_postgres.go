@@ -4,6 +4,7 @@ import (
 	"WalletRieltaTestTask/internal/entity"
 	"WalletRieltaTestTask/pkg/postgres"
 	"context"
+	"fmt"
 )
 
 type WalletRepo struct {
@@ -17,6 +18,7 @@ func New(pg *postgres.Postgres) *WalletRepo {
 // CreateNewWallet - creating new wallet entry in the db.
 func (r *WalletRepo) CreateNewWallet(ctx context.Context, wallet *entity.Wallet) (*entity.Wallet, error) {
 	// TODO
+	fmt.Println(wallet)
 
 	return wallet, nil
 }

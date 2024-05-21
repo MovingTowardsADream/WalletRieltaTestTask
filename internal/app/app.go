@@ -5,19 +5,22 @@ import (
 	v1 "WalletRieltaTestTask/internal/wallet/controller/http/v1"
 	gateway "WalletRieltaTestTask/internal/wallet/gateway/rabbitmq"
 	walletUseCase "WalletRieltaTestTask/internal/wallet/usecase"
+	"WalletRieltaTestTask/internal/walletWorker/controller/amqp_rpc"
 	worker_postgres "WalletRieltaTestTask/internal/walletWorker/repository/postgres"
 	workerUC "WalletRieltaTestTask/internal/walletWorker/usecase"
 	"WalletRieltaTestTask/pkg/httpserver"
 	"WalletRieltaTestTask/pkg/postgres"
 	"WalletRieltaTestTask/pkg/rabbitmq/rmq_rpc/client"
-	"fmt"
+	"WalletRieltaTestTask/pkg/rabbitmq/rmq_rpc/server"
 	"github.com/gin-gonic/gin"
 	_ "github.com/lib/pq"
 	"log/slog"
 )
 
 type App struct {
-	DB *postgres.Postgres
+	HTTPServer *httpserver.Server
+	RMQServer  *server.Server
+	DB         *postgres.Postgres
 }
 
 func New(log *slog.Logger, cfg *config.Config) *App {
@@ -48,9 +51,23 @@ func New(log *slog.Logger, cfg *config.Config) *App {
 	v1.NewRouter(handler, log, walletUseCase)
 	httpServer := httpserver.New(log, handler, httpserver.Port(cfg.HTTP.Port), httpserver.WriteTimeout(cfg.HTTP.Timeout))
 
-	fmt.Println(workerUseCase, httpServer)
+	// Init rabbitMQ RPC Server
+	rmqRouter := amqp_rpc.NewRouter(workerUseCase)
+
+	rmqServer, err := server.New(
+		cfg.RMQ.URL,
+		cfg.RMQ.ServerExchange,
+		rmqRouter,
+		log,
+		server.DefaultGoroutinesCount(cfg.App.CountWorkers),
+	)
+	if err != nil {
+		panic("app - Run - rmqServer - server.New" + err.Error())
+	}
 
 	return &App{
-		DB: pg,
+		HTTPServer: httpServer,
+		RMQServer:  rmqServer,
+		DB:         pg,
 	}
 }
