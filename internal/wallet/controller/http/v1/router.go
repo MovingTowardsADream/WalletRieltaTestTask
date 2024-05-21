@@ -1,6 +1,7 @@
 package v1
 
 import (
+	_ "WalletRieltaTestTask/docs"
 	"WalletRieltaTestTask/internal/wallet/usecase"
 	"github.com/gin-gonic/gin"
 	"github.com/prometheus/client_golang/prometheus/promhttp"

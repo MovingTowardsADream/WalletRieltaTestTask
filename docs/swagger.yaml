@@ -1,0 +1,149 @@
+basePath: /api/v1
+definitions:
+  entity.Transaction:
+    properties:
+      amount:
+        example: 30
+        type: integer
+      from:
+        example: 5b53700ed469fa6a09ea72bb78f36fd9
+        type: string
+      time:
+        example: "2024-02-04T17:25:35.448Z"
+        format: date-time
+        type: string
+      to:
+        example: eb376add88bf8e70f80787266a0801d5
+        type: string
+    required:
+    - amount
+    - from
+    - time
+    - to
+    type: object
+  entity.Wallet:
+    properties:
+      balance:
+        example: 100
+        type: integer
+      id:
+        example: 5b53700ed469fa6a09ea72bb78f36fd9
+        type: string
+    required:
+    - balance
+    - id
+    type: object
+  v1.transactionRequest:
+    description: Запрос перевода средств.
+    properties:
+      amount:
+        example: 100
+        type: integer
+      to:
+        example: eb376add88bf8e70f80787266a0801d5
+        type: string
+    required:
+    - amount
+    - to
+    type: object
+host: localhost:8080
+info:
+  contact: {}
+  description: This is a test task.
+  title: Wallet Rielta
+  version: "1.0"
+paths:
+  /wallet:
+    post:
+      description: |-
+        Создает новый кошелек с уникальным ID. Идентификатор генерируется сервером.
+
+        Созданный кошелек должен иметь сумму 100.0 у.е. на балансе
+      responses:
+        "200":
+          description: Кошелек создан
+          schema:
+            $ref: '#/definitions/entity.Wallet'
+        "500":
+          description: Не удалось создать кошелек
+        "504":
+          description: Время ожидания вышло
+      summary: Создание кошелька
+      tags:
+      - Wallet
+  /wallet/{walletId}:
+    get:
+      parameters:
+      - description: ID кошелька
+        in: path
+        name: walletId
+        required: true
+        type: string
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/entity.Wallet'
+        "404":
+          description: Указанный кошелек не найден
+        "500":
+          description: Не удалось выполнить запрос
+        "504":
+          description: Время ожидания вышло
+      summary: Получение текущего состояния кошелька
+      tags:
+      - Wallet
+  /wallet/{walletId}/history:
+    get:
+      description: Возвращает историю транзакций по указанному кошельку.
+      parameters:
+      - description: ID кошелька
+        in: path
+        name: walletId
+        required: true
+        type: string
+      responses:
+        "200":
+          description: История транзакций получена
+          schema:
+            items:
+              $ref: '#/definitions/entity.Transaction'
+            type: array
+        "404":
+          description: Указанный кошелек не найден
+        "500":
+          description: Не удалось выполнить запрос
+        "504":
+          description: Время ожидания вышло
+      summary: Получение историй входящих и исходящих транзакций
+      tags:
+      - Wallet
+  /wallet/{walletId}/send:
+    post:
+      parameters:
+      - description: ID кошелька
+        in: path
+        name: walletId
+        required: true
+        type: string
+      - description: Запрос перевода средств
+        in: body
+        name: input
+        required: true
+        schema:
+          $ref: '#/definitions/v1.transactionRequest'
+      responses:
+        "200":
+          description: Перевод успешно проведен
+        "400":
+          description: Ошибка в пользовательском запросе
+        "404":
+          description: Исходящий кошелек не найден
+        "500":
+          description: Ошибка перевода
+        "504":
+          description: Время ожидания вышло
+      summary: Перевод средств с одного кошелька на другой
+      tags:
+      - Wallet
+swagger: "2.0"

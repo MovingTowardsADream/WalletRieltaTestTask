@@ -9,6 +9,12 @@ import (
 	"syscall"
 )
 
+// @title           Wallet Rielta
+// @version         1.0
+// @description     This is a test task.
+
+// @host      localhost:8080
+// @BasePath  /api/v1
 func main() {
 	// Init configuration
 	cfg := config.MustLoad()
